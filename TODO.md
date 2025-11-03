@@ -1,0 +1,8 @@
+- [x] Create backend/ directory
+- [x] Create backend/server.js with Razorpay order creation code
+- [x] Create backend/.env with RAZORPAY_KEY_ID and RAZORPAY_SECRET
+- [x] Create/update backend/package.json with dependencies (express, razorpay, dotenv)
+- [x] Update src/App.js: change fetch URL to "http://localhost:5000/order", update key to process.env.REACT_APP_RAZORPAY_KEY_ID || "rzp_test_Ra3JsQqrTpsTnQ", adjust options (name, description)
+- [x] Install backend dependencies
+- [ ] Run the backend server
+- [ ] Test the integration
