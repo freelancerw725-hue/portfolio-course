@@ -142,7 +142,7 @@ export default function PortfolioCourseSite() {
               <div className="space-y-6">
                 <div className="aspect-w-16 aspect-h-9 rounded-3xl overflow-hidden shadow-2xl border border-gray-200">
                   <iframe
-                    src="https://www.youtube.com/embed/qk2WMmiiVFE"
+                    src="https://youtu.be/rjaccJ5nmLQ?si=YZ30vibYd8aDLs8k"
                     title="Demo Video"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
