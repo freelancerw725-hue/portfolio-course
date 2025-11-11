@@ -142,7 +142,7 @@ export default function PortfolioCourseSite() {
               <div className="space-y-6">
                 <div className="aspect-w-16 aspect-h-9 rounded-3xl overflow-hidden shadow-2xl border border-gray-200">
                   <iframe
-                    src="https://youtu.be/rjaccJ5nmLQ?si=YZ30vibYd8aDLs8k"
+                    src="https://player.vimeo.com/video/1135647040"
                     title="Demo Video"
                     frameBorder="0"
                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -150,6 +150,7 @@ export default function PortfolioCourseSite() {
                     className="w-full h-64 md:h-96"
                   ></iframe>
                 </div>
+                <a href="https://jumpshare.com/s/SuDRHZvS8yHGMNQ7bhZr" target="_blank" rel="noopener noreferrer" className="text-emerald-600 hover:text-emerald-700 font-medium">Watch Demo Video</a>
                 <div className={sectionCard}>
                   <h3 className="font-semibold text-gray-900 text-lg">🧾 What You’ll Get:</h3>
 <ul className="list-inside mt-3 text-gray-700 space-y-2">
@@ -231,6 +232,72 @@ export default function PortfolioCourseSite() {
             </div>
           </section>
         )}
+
+        {page === "terms" && (
+          <section className="py-8 md:py-16">
+            <div className={sectionCard + " max-w-4xl mx-auto"}>
+              <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900">Terms and Conditions</h2>
+              <div className="mt-6 text-gray-700 space-y-4">
+                <p>Welcome to Cybercafe Services. By accessing or using our website and purchasing our course, you agree to comply with and be bound by the following terms and conditions.</p>
+                <h3 className="font-semibold text-lg">Purpose of the Site</h3>
+                <p>This website is designed for selling online courses on practical cybercafe services, including how to apply for PAN card, update Aadhaar, apply for Voter ID, and related digital services.</p>
+                <h3 className="font-semibold text-lg">Course Access</h3>
+                <p>Courses are provided in video format for personal use only. Reselling or sharing course content is strictly prohibited.</p>
+                <h3 className="font-semibold text-lg">Payment & Refund Rules</h3>
+                <p>All payments are processed securely via Razorpay. Refunds are handled as per our Refund Policy.</p>
+                <h3 className="font-semibold text-lg">User Responsibilities</h3>
+                <p>Users must not share login credentials or distribute course materials. Any misuse may result in account suspension.</p>
+                <h3 className="font-semibold text-lg">Limitation of Liability</h3>
+                <p>We are not liable for any indirect damages arising from the use of our courses. Courses are for educational purposes only.</p>
+                <h3 className="font-semibold text-lg">Contact Information</h3>
+                <p>For support, email us at shop43856@gmail.com or call +91 9229721835.</p>
+              </div>
+              <button onClick={() => setPage("home")} className="block mx-auto text-sm text-gray-500 hover:text-emerald-600 mt-6">← Back to Home</button>
+            </div>
+          </section>
+        )}
+
+        {page === "privacy" && (
+          <section className="py-8 md:py-16">
+            <div className={sectionCard + " max-w-4xl mx-auto"}>
+              <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900">Privacy Policy</h2>
+              <div className="mt-6 text-gray-700 space-y-4">
+                <p>Your privacy is important to us. This policy explains how we collect, use, and protect your personal information.</p>
+                <h3 className="font-semibold text-lg">Information We Collect</h3>
+                <p>We collect your name, email, phone number, and payment details for account creation and course access.</p>
+                <h3 className="font-semibold text-lg">How We Use Your Information</h3>
+                <p>Your data is used to provide course access, process payments, and communicate updates. We do not sell your data to third parties.</p>
+                <h3 className="font-semibold text-lg">Razorpay Payment Data</h3>
+                <p>Payment information is handled securely by Razorpay. We do not store your card details.</p>
+                <h3 className="font-semibold text-lg">Cookies and Analytics</h3>
+                <p>We use cookies to improve user experience and track website usage anonymously.</p>
+                <h3 className="font-semibold text-lg">User Rights</h3>
+                <p>You can request to view, modify, or delete your data by contacting us at shop43856@gmail.com.</p>
+              </div>
+              <button onClick={() => setPage("home")} className="block mx-auto text-sm text-gray-500 hover:text-emerald-600 mt-6">← Back to Home</button>
+            </div>
+          </section>
+        )}
+
+        {page === "refund" && (
+          <section className="py-8 md:py-16">
+            <div className={sectionCard + " max-w-4xl mx-auto"}>
+              <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900">Refund & Cancellation Policy</h2>
+              <div className="mt-6 text-gray-700 space-y-4">
+                <p>Our courses are digital products, and we strive to provide high-quality content. Please review our refund policy below.</p>
+                <h3 className="font-semibold text-lg">Refund Eligibility</h3>
+                <p>Due to the digital nature of our courses, no refunds are provided after purchase. However, if there is a technical issue preventing access, contact us for assistance.</p>
+                <h3 className="font-semibold text-lg">Payment Failures</h3>
+                <p>If a payment fails or is duplicated, refunds will be processed within 5-7 business days via the original payment method.</p>
+                <h3 className="font-semibold text-lg">Cancellation</h3>
+                <p>You can cancel your purchase before completing the payment. Once paid, the transaction is final.</p>
+                <h3 className="font-semibold text-lg">Contact for Issues</h3>
+                <p>For any refund or cancellation queries, email shop43856@gmail.com or call +91 9229721835.</p>
+              </div>
+              <button onClick={() => setPage("home")} className="block mx-auto text-sm text-gray-500 hover:text-emerald-600 mt-6">← Back to Home</button>
+            </div>
+          </section>
+        )}
       </main>
 
       <footer className="mt-20 py-10 bg-gray-900 text-gray-300 border-t border-gray-700">
@@ -245,6 +312,9 @@ export default function PortfolioCourseSite() {
             <ul className="space-y-2">
               <li><button onClick={() => setPage("home")} className="hover:text-emerald-400">Home</button></li>
               <li><button onClick={() => setPage("checkout")} className="hover:text-emerald-400">Buy Course</button></li>
+              <li><button onClick={() => setPage("terms")} className="hover:text-emerald-400">Terms and Conditions</button></li>
+              <li><button onClick={() => setPage("privacy")} className="hover:text-emerald-400">Privacy Policy</button></li>
+              <li><button onClick={() => setPage("refund")} className="hover:text-emerald-400">Refund & Cancellation Policy</button></li>
             </ul>
           </div>
           <div className="text-center md:text-right">
