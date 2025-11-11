@@ -1,5 +1,56 @@
 import React, { useState, useEffect } from "react";
 
+function CustomerList() {
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    fetchCustomers();
+  }, []);
+
+  const fetchCustomers = async () => {
+    try {
+      const res = await fetch("http://localhost:5000/customers");
+      if (!res.ok) throw new Error("Failed to fetch customers");
+      const data = await res.json();
+      setCustomers(data);
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) return <p>Loading customers...</p>;
+  if (error) return <p>Error: {error}</p>;
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full border-collapse border border-gray-300">
+        <thead>
+          <tr className="bg-gray-100">
+            <th className="border border-gray-300 p-2 text-left">Name</th>
+            <th className="border border-gray-300 p-2 text-left">Email</th>
+            <th className="border border-gray-300 p-2 text-left">Mobile</th>
+            <th className="border border-gray-300 p-2 text-left">Created At</th>
+          </tr>
+        </thead>
+        <tbody>
+          {customers.map((customer, index) => (
+            <tr key={index} className="hover:bg-gray-50">
+              <td className="border border-gray-300 p-2">{customer.name}</td>
+              <td className="border border-gray-300 p-2">{customer.email}</td>
+              <td className="border border-gray-300 p-2">{customer.mobile}</td>
+              <td className="border border-gray-300 p-2">{new Date(customer.createdAt).toLocaleString()}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function PortfolioCourseSite() {
   const [page, setPage] = useState("home");
   const [loading, setLoading] = useState(false);
@@ -47,10 +98,22 @@ export default function PortfolioCourseSite() {
 
   async function handleBuyNow(customer) {
     const name = document.getElementById('cust_name').value.trim();
+    const email = document.getElementById('cust_email').value.trim();
     const contact = document.getElementById('cust_contact').value.trim();
 
-    if (!name || !contact) {
-      setToast("❌ Full name and mobile number are required.");
+    if (!name || !email || !contact) {
+      setToast("❌ Full name, email, and mobile number are required.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setToast("❌ Please enter a valid email address.");
+      return;
+    }
+
+    if (!/^\d{10}$/.test(contact)) {
+      setToast("❌ Mobile number must be exactly 10 digits and contain only numbers.");
       return;
     }
 
@@ -66,16 +129,33 @@ export default function PortfolioCourseSite() {
         description: "Cybercafe Services & Practical Course",
         order_id: order.id,
         image: "/logo.png",
-        handler: () => {
+        handler: async () => {
           setToast("✅ Payment successful! Thank you.");
           setPage("success");
           setLoading(false);
+          // Save customer data to backend
+          try {
+            const response = await fetch("http://localhost:5000/save-customer", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ name, email, mobile: contact }),
+            });
+            if (!response.ok) {
+              console.error("Failed to save customer data");
+            }
+          } catch (error) {
+            console.error("Error saving customer:", error);
+          }
         },
-        prefill: { name, contact },
+        prefill: { name, email, contact },
         theme: { color: "#059669" },
       };
       const rzp = new window.Razorpay(options);
-      rzp.on("payment.failed", () => setToast("❌ Payment failed, please retry."));
+      rzp.on("payment.failed", (response) => {
+        console.error("Payment failed:", response.error);
+        setToast("❌ Payment failed, please retry.");
+        setLoading(false);
+      });
       rzp.open();
     } catch (err) {
       setToast("Error: " + err);
@@ -207,6 +287,7 @@ export default function PortfolioCourseSite() {
 
               <div className="mt-8 space-y-5">
                 <input id="cust_name" placeholder="Full name" required className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-emerald-500 outline-none text-sm md:text-base" />
+                <input id="cust_email" type="email" placeholder="Email address" required className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-emerald-500 outline-none text-sm md:text-base" />
                 <input id="cust_contact" placeholder="Mobile number" required className="w-full border rounded-lg p-3 focus:ring-2 focus:ring-emerald-500 outline-none text-sm md:text-base" />
 
                 <button
@@ -298,6 +379,19 @@ export default function PortfolioCourseSite() {
             </div>
           </section>
         )}
+
+        {page === "admin" && (
+          <section className="py-8 md:py-16">
+            <div className={sectionCard + " max-w-6xl mx-auto"}>
+              <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900">Admin Dashboard</h2>
+              <p className="mt-3 text-gray-600 text-center text-sm md:text-base">View all customer data saved after payments.</p>
+              <div className="mt-8">
+                <CustomerList />
+              </div>
+              <button onClick={() => setPage("home")} className="block mx-auto text-sm text-gray-500 hover:text-emerald-600 mt-6">← Back to Home</button>
+            </div>
+          </section>
+        )}
       </main>
 
       <footer className="mt-20 py-10 bg-gray-900 text-gray-300 border-t border-gray-700">
@@ -320,6 +414,7 @@ export default function PortfolioCourseSite() {
           <div className="text-center md:text-right">
             <p>© {new Date().getFullYear()} <span className="text-emerald-400 font-semibold">Your Business</span></p>
             <p className="text-sm">Cybercafe Practical Course</p>
+            <button onClick={() => setPage("admin")} className="text-xs text-gray-500 hover:text-emerald-400 mt-2">Admin</button>
           </div>
         </div>
       </footer>
