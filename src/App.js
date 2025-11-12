@@ -380,6 +380,32 @@ export default function PortfolioCourseSite() {
           </section>
         )}
 
+        {page === "shipping" && (
+          <section className="py-8 md:py-16">
+            <div className={sectionCard + " max-w-4xl mx-auto"}>
+              <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900">Shipping & Delivery Policy</h2>
+              <div className="mt-6 text-gray-700 space-y-4">
+                <p>At Cybercafe Services, we provide digital courses that are delivered electronically. Please review our delivery policy below.</p>
+                <h3 className="font-semibold text-lg">Digital Product Delivery</h3>
+                <p>Our courses are 100% digital products. There is no physical shipping involved. All course materials, including video lessons, templates, and resources, are delivered electronically via email and online access.</p>
+                <h3 className="font-semibold text-lg">Delivery Timeline</h3>
+                <p>After successful payment confirmation through Razorpay, you will receive instant access to the course. A confirmation email with your course access link will be sent to your registered email address within 5-10 minutes of payment completion.</p>
+                <h3 className="font-semibold text-lg">How to Access Your Course</h3>
+                <p>Once payment is confirmed, check your email inbox (and spam folder) for the course access link. Click on the link to access all video lessons, downloadable templates, and additional resources. You can access the course anytime from any device with internet connectivity.</p>
+                <h3 className="font-semibold text-lg">Delivery Issues</h3>
+                <p>If you do not receive the course access email within 30 minutes of payment, please check your spam/junk folder first. If you still cannot find it, contact our support team immediately at shop43856@gmail.com or call +91 9229721835 with your payment details.</p>
+                <h3 className="font-semibold text-lg">Technical Support</h3>
+                <p>We provide technical support for any access-related issues. If you face problems logging in or accessing course materials, our team is available to assist you via email or phone during business hours.</p>
+                <h3 className="font-semibold text-lg">No Physical Shipping</h3>
+                <p>Since this is a digital product, there are no shipping charges, no physical delivery, and no courier services involved. All materials are accessible online immediately after purchase.</p>
+                <h3 className="font-semibold text-lg">Contact Information</h3>
+                <p>For any delivery or access-related queries, email us at shop43856@gmail.com or call +91 9229721835.</p>
+              </div>
+              <button onClick={() => setPage("home")} className="block mx-auto text-sm text-gray-500 hover:text-emerald-600 mt-6">← Back to Home</button>
+            </div>
+          </section>
+        )}
+
         {page === "admin" && (
           <section className="py-8 md:py-16">
             <div className={sectionCard + " max-w-6xl mx-auto"}>
@@ -409,6 +435,7 @@ export default function PortfolioCourseSite() {
               <li><button onClick={() => setPage("terms")} className="hover:text-emerald-400">Terms and Conditions</button></li>
               <li><button onClick={() => setPage("privacy")} className="hover:text-emerald-400">Privacy Policy</button></li>
               <li><button onClick={() => setPage("refund")} className="hover:text-emerald-400">Refund & Cancellation Policy</button></li>
+              <li><button onClick={() => setPage("shipping")} className="hover:text-emerald-400">Shipping & Delivery Policy</button></li>
             </ul>
           </div>
           <div className="text-center md:text-right">
