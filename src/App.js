@@ -380,6 +380,40 @@ export default function PortfolioCourseSite() {
           </section>
         )}
 
+        {page === "shipping" && (
+          <section className="py-8 md:py-16">
+            <div className={sectionCard + " max-w-4xl mx-auto"}>
+              <h2 className="text-2xl md:text-3xl font-bold text-center text-gray-900">Shipping & Delivery Policy</h2>
+              <div className="mt-6 text-gray-700 space-y-4">
+                <p>Thank you for purchasing our online course. Please review our shipping and delivery policy for digital products.</p>
+                <h3 className="font-semibold text-lg">Digital Product Delivery</h3>
+                <p>Our courses are 100% digital products. There is no physical shipping involved. Upon successful payment, you will receive instant access to the course materials.</p>
+                <h3 className="font-semibold text-lg">Delivery Method</h3>
+                <p>After completing your payment through Razorpay, you will receive a confirmation email at the email address provided during checkout. This email will contain:</p>
+                <ul className="list-disc list-inside ml-4 space-y-1">
+                  <li>Course access link or login credentials</li>
+                  <li>Instructions on how to access your course materials</li>
+                  <li>Payment receipt and invoice</li>
+                </ul>
+                <h3 className="font-semibold text-lg">Delivery Timeframe</h3>
+                <p>Course access is provided immediately after successful payment verification. You should receive your access email within 5-10 minutes. If you don't receive it, please check your spam/junk folder.</p>
+                <h3 className="font-semibold text-lg">Access Issues</h3>
+                <p>If you experience any issues accessing your course after payment, please contact us immediately at shop43856@gmail.com or call +91 9229721835. We will resolve your issue within 24 hours.</p>
+                <h3 className="font-semibold text-lg">Course Availability</h3>
+                <p>Once purchased, you will have lifetime access to the course materials. You can access the videos and resources anytime from any device with an internet connection.</p>
+                <h3 className="font-semibold text-lg">Technical Requirements</h3>
+                <p>To access the course, you need:</p>
+                <ul className="list-disc list-inside ml-4 space-y-1">
+                  <li>A stable internet connection</li>
+                  <li>A modern web browser (Chrome, Firefox, Safari, or Edge)</li>
+                  <li>Valid email address for receiving course access details</li>
+                </ul>
+              </div>
+              <button onClick={() => setPage("home")} className="block mx-auto text-sm text-gray-500 hover:text-emerald-600 mt-6">← Back to Home</button>
+            </div>
+          </section>
+        )}
+
         {page === "admin" && (
           <section className="py-8 md:py-16">
             <div className={sectionCard + " max-w-6xl mx-auto"}>
@@ -409,6 +443,7 @@ export default function PortfolioCourseSite() {
               <li><button onClick={() => setPage("terms")} className="hover:text-emerald-400">Terms and Conditions</button></li>
               <li><button onClick={() => setPage("privacy")} className="hover:text-emerald-400">Privacy Policy</button></li>
               <li><button onClick={() => setPage("refund")} className="hover:text-emerald-400">Refund & Cancellation Policy</button></li>
+              <li><button onClick={() => setPage("shipping")} className="hover:text-emerald-400">Shipping & Delivery Policy</button></li>
             </ul>
           </div>
           <div className="text-center md:text-right">
