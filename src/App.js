@@ -627,10 +627,10 @@ function CheckoutField({
   error,
 }) {
   return (
-    <label htmlFor={id} className="block">
-      <span className="text-sm font-medium text-slate-200">{label}</span>
+    <label htmlFor={id} className="block w-full max-w-full">
+      <span className="text-sm font-medium text-slate-200 sm:text-[15px]">{label}</span>
       <div
-        className={`mt-2 rounded-[22px] border backdrop-blur-xl transition duration-300 ${
+        className={`mt-2 w-full max-w-full rounded-[22px] border backdrop-blur-xl transition duration-300 ${
           error
             ? "border-rose-400/55 bg-rose-500/[0.07] shadow-[0_0_0_1px_rgba(251,113,133,0.14),0_18px_44px_rgba(15,23,42,0.36)]"
             : "border-white/10 bg-white/[0.04] shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_18px_44px_rgba(15,23,42,0.28)]"
@@ -648,7 +648,7 @@ function CheckoutField({
           placeholder={placeholder}
           aria-invalid={Boolean(error)}
           aria-describedby={error ? `${id}-error` : undefined}
-          className="h-14 w-full rounded-[22px] bg-transparent px-4 text-base text-white outline-none placeholder:text-slate-500"
+          className="h-14 w-full max-w-full rounded-[22px] bg-transparent px-4 text-[16px] leading-6 text-white outline-none placeholder:text-slate-500 sm:text-base"
         />
       </div>
       <AnimatePresence initial={false}>
@@ -1723,8 +1723,8 @@ export default function App() {
         </AnimatePresence>
       </header>
 
-      <main id="top" className="relative z-10 pb-32 lg:pb-0">
-        <section className="mx-auto grid max-w-7xl gap-10 px-4 pb-12 pt-8 sm:px-6 lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:px-8 lg:pb-16 lg:pt-12">
+      <main id="top" className="relative z-10 overflow-x-hidden pb-32 lg:pb-0">
+        <section className="mx-auto grid max-w-7xl gap-7 px-4 pb-8 pt-5 sm:gap-10 sm:px-6 sm:pb-12 sm:pt-8 lg:grid-cols-[0.92fr_1.08fr] lg:items-center lg:px-8 lg:pb-16 lg:pt-12">
           <motion.div
             initial="hidden"
             animate="visible"
@@ -1735,23 +1735,23 @@ export default function App() {
               Premium AI Website Ecosystem
             </div>
 
-            <h1 className="mt-6 font-display text-4xl leading-tight text-white sm:text-5xl lg:text-6xl xl:text-7xl">
+            <h1 className="mt-5 font-display text-[2.2rem] leading-[1.08] text-white min-[360px]:text-[2.45rem] sm:mt-6 sm:text-5xl sm:leading-tight lg:text-6xl xl:text-7xl">
               AI Tools Se Website Bana Kar
               <span className="block bg-[linear-gradient(135deg,_#FFFFFF_12%,_#9F7AEA_45%,_#67E8F9_100%)] bg-clip-text text-transparent">
                 Clients Se Paise Kamao
               </span>
             </h1>
 
-            <p className="mt-6 max-w-xl text-base leading-8 text-slate-300 sm:text-lg">
+            <p className="mt-5 max-w-xl text-[15px] leading-7 text-slate-300 sm:mt-6 sm:text-lg sm:leading-8">
               ChatGPT aur AI coding tools ka use karke modern websites banana,
               deploy karna aur sell karna seekho.
             </p>
 
-            <div className="mt-7 flex flex-wrap gap-3">
+            <div className="mt-6 flex flex-wrap gap-2.5 sm:mt-7 sm:gap-3">
               {heroPillars.map((item) => (
                 <span
                   key={item}
-                  className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-4 py-2 text-sm text-slate-200 backdrop-blur-xl"
+                  className="inline-flex max-w-full items-center gap-2 rounded-full border border-white/10 bg-white/[0.05] px-3 py-2 text-xs text-slate-200 backdrop-blur-xl sm:px-4 sm:text-sm"
                 >
                   <span className="h-2 w-2 rounded-full bg-cyan-300 shadow-[0_0_14px_rgba(103,232,249,0.9)]" />
                   {item}
@@ -1759,7 +1759,7 @@ export default function App() {
               ))}
             </div>
 
-            <div className="mt-8 flex flex-col gap-4 sm:flex-row">
+            <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:gap-4 sm:flex-row">
               <MagneticButton
                 onClick={openCheckoutModal}
                 aria-controls="checkout-modal"
@@ -1778,20 +1778,20 @@ export default function App() {
               </MagneticButton>
             </div>
 
-            <div className="mt-5 flex flex-wrap gap-4 text-sm text-slate-400">
-              <span className="inline-flex items-center gap-2">
+            <div className="mt-4 flex flex-wrap gap-3 text-xs text-slate-400 sm:mt-5 sm:gap-4 sm:text-sm">
+              <span className="inline-flex max-w-full flex-wrap items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-cyan-300" />
                 AI automatically builds websites in real time
               </span>
-              <span className="inline-flex items-center gap-2">
+              <span className="inline-flex max-w-full flex-wrap items-center gap-2">
                 <span className="h-2 w-2 rounded-full bg-violet-300" />
                 Prompt, refine, deploy and sell workflow
               </span>
             </div>
 
-            <div className="mt-10 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+            <div className="mt-8 grid gap-3 sm:mt-10 sm:gap-4 sm:grid-cols-2 xl:grid-cols-4">
               {heroStats.map((stat) => (
-                <div key={stat.value} className="glass-card rounded-3xl p-4">
+                <div key={stat.value} className="glass-card rounded-3xl p-3.5 sm:p-4">
                   <p className="font-display text-lg text-white">{stat.value}</p>
                   <p className="mt-2 text-sm leading-6 text-slate-400">{stat.label}</p>
                 </div>
@@ -2501,28 +2501,20 @@ export default function App() {
         </div>
       </footer>
 
-      <a
-        href="https://wa.me/919229721835"
-        target="_blank"
-        rel="noreferrer"
-        className="whatsapp-float fixed right-4 z-40 inline-flex items-center gap-3 rounded-full border border-emerald-400/20 bg-[#0A1715]/90 px-5 py-3 text-sm font-semibold text-emerald-50 shadow-[0_18px_48px_rgba(16,185,129,0.18)] backdrop-blur-2xl"
-      >
-        <span className="text-lg">WA</span>
-        Chat on WhatsApp
-      </a>
-
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-white/10 bg-[#080B14]/94 px-4 py-3 backdrop-blur-2xl lg:hidden">
-        <div className="mx-auto flex max-w-7xl items-center justify-between gap-4">
-          <div>
-            <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Live Course</p>
-            <p className="font-display text-xl text-white">{COURSE_PRICE_LABEL}</p>
+        <div className="mx-auto flex max-w-7xl items-center gap-3">
+          <div className="min-w-0 shrink">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-slate-400 sm:text-xs sm:tracking-[0.24em]">
+              Live Course
+            </p>
+            <p className="font-display text-lg text-white sm:text-xl">{COURSE_PRICE_LABEL}</p>
           </div>
           <MagneticButton
             onClick={openCheckoutModal}
             aria-controls="checkout-modal"
             aria-expanded={checkoutModalOpen}
             aria-haspopup="dialog"
-            className="pulse-button min-w-[220px] justify-center text-center"
+            className="pulse-button flex-1 justify-center text-center text-sm sm:min-w-[220px] sm:text-base"
           >
             Join Live Course
           </MagneticButton>
@@ -2536,7 +2528,7 @@ export default function App() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.24 }}
-            className="fixed inset-0 z-[70] overflow-y-auto bg-[#020617]/78 px-3 py-3 backdrop-blur-xl sm:px-4 sm:py-6"
+            className="fixed inset-0 z-[70] overflow-hidden bg-[#020617]/80 px-2 py-3 backdrop-blur-xl sm:px-4 sm:py-6"
             onClick={closeCheckoutModal}
           >
             <div className="flex min-h-full items-center justify-center">
@@ -2550,22 +2542,32 @@ export default function App() {
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 exit={{ opacity: 0, y: 18, scale: 0.96 }}
                 transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-                className="relative w-full max-w-lg overflow-hidden rounded-[30px] border border-white/12 bg-[linear-gradient(180deg,_rgba(15,23,42,0.94),_rgba(2,6,23,0.92))] shadow-[0_44px_120px_rgba(2,6,23,0.72),0_0_0_1px_rgba(255,255,255,0.04)]"
+                className="relative w-[92vw] max-w-[34rem] max-w-full overflow-hidden rounded-[28px] border border-white/12 bg-[linear-gradient(180deg,_rgba(15,23,42,0.95),_rgba(2,6,23,0.93))] shadow-[0_44px_120px_rgba(2,6,23,0.72),0_0_0_1px_rgba(255,255,255,0.04)]"
                 onClick={(event) => event.stopPropagation()}
               >
                 <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-[linear-gradient(90deg,_transparent,_rgba(103,232,249,0.82),_rgba(168,85,247,0.9),_transparent)]" />
                 <div className="pointer-events-none absolute -left-12 top-14 h-28 w-28 rounded-full bg-violet-500/18 blur-3xl" />
                 <div className="pointer-events-none absolute -right-10 bottom-10 h-32 w-32 rounded-full bg-cyan-400/16 blur-3xl" />
 
-                <div className="relative max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain p-5 sm:p-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="max-w-md">
+                <button
+                  type="button"
+                  onClick={closeCheckoutModal}
+                  disabled={isSubmitting}
+                  aria-label="Close checkout modal"
+                  className="absolute right-3 top-3 z-10 inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white transition hover:border-cyan-300/35 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60 sm:right-4 sm:top-4"
+                >
+                  X
+                </button>
+
+                <div className="relative max-h-[90vh] overflow-y-auto overflow-x-hidden overscroll-contain px-4 pb-5 pt-5 sm:px-6 sm:pb-6 sm:pt-6">
+                  <div className="flex items-start justify-between gap-4 pr-12 sm:pr-14">
+                    <div className="max-w-md min-w-0">
                       <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-cyan-200/85">
                         Secure Enrollment
                       </p>
                       <h3
                         id="checkout-modal-title"
-                        className="mt-3 font-display text-2xl text-white sm:text-3xl"
+                        className="mt-3 font-display text-[1.45rem] leading-tight text-white sm:text-3xl"
                       >
                         Join AI Coding Live Course
                       </h3>
@@ -2576,19 +2578,9 @@ export default function App() {
                         Enter your details to continue secure PayU checkout.
                       </p>
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={closeCheckoutModal}
-                      disabled={isSubmitting}
-                      aria-label="Close checkout modal"
-                      className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white transition hover:border-cyan-300/35 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      X
-                    </button>
                   </div>
 
-                  <form onSubmit={handlePayment} className="mt-6 space-y-4">
+                  <form onSubmit={handlePayment} className="mt-5 w-full max-w-full space-y-4 sm:mt-6 sm:space-y-5">
                     <CheckoutField
                       id="checkout-name"
                       name="name"
@@ -2629,27 +2621,27 @@ export default function App() {
                       error={fieldErrors.email}
                     />
 
-                    <div className="rounded-[26px] border border-white/10 bg-white/[0.04] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:p-5">
-                      <div className="flex items-start justify-between gap-4">
-                        <div>
+                    <div className="w-full max-w-full rounded-[24px] border border-white/10 bg-white/[0.04] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:rounded-[26px] sm:p-5">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between sm:gap-4">
+                        <div className="min-w-0">
                           <p className="text-xs uppercase tracking-[0.24em] text-slate-400">
                             Price
                           </p>
-                          <p className="mt-2 font-display text-4xl text-white">
+                          <p className="mt-2 font-display text-3xl text-white sm:text-4xl">
                             {COURSE_PRICE_LABEL}
                           </p>
                         </div>
 
-                        <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.08] px-3 py-2 text-right text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-100">
+                        <div className="w-full max-w-full rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.08] px-3 py-2 text-left text-[11px] font-semibold uppercase tracking-[0.2em] text-cyan-100 sm:w-auto sm:text-right sm:tracking-[0.22em]">
                           Secure PayU Checkout
                         </div>
                       </div>
 
-                      <div className="mt-4 flex flex-wrap gap-2.5">
+                      <div className="mt-4 flex flex-wrap gap-2">
                         {paymentMethods.map((method) => (
                           <div
                             key={method}
-                            className="inline-flex min-h-[40px] items-center rounded-full border border-white/10 bg-slate-950/60 px-4 text-sm text-slate-200"
+                            className="inline-flex min-h-[40px] max-w-full items-center rounded-full border border-white/10 bg-slate-950/60 px-3 text-xs text-slate-200 sm:px-4 sm:text-sm"
                           >
                             {method}
                           </div>
@@ -2660,7 +2652,7 @@ export default function App() {
                     <MagneticButton
                       type="submit"
                       disabled={isSubmitting}
-                      className="w-full min-h-[56px] justify-center rounded-[22px] text-base shadow-[0_22px_55px_rgba(124,58,237,0.34)]"
+                      className="w-full max-w-full min-h-[56px] justify-center rounded-[22px] text-base shadow-[0_22px_55px_rgba(124,58,237,0.34)]"
                     >
                       {isSubmitting ? (
                         <>
@@ -2672,7 +2664,7 @@ export default function App() {
                       )}
                     </MagneticButton>
 
-                    <p className="text-center text-sm leading-6 text-slate-400">
+                    <p className="text-center text-xs leading-6 text-slate-400 sm:text-sm">
                       Your details stay encrypted and payment happens on PayU's
                       hosted checkout.
                     </p>
