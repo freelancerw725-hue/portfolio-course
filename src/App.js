@@ -467,6 +467,73 @@ const reveal = {
   },
 };
 
+function createEmptyFieldErrors() {
+  return { name: "", email: "", phone: "" };
+}
+
+function sanitizeCheckoutForm(formValues) {
+  return {
+    name: formValues.name.trim().replace(/\s+/g, " "),
+    email: formValues.email.trim().toLowerCase(),
+    phone: formValues.phone.replace(/\D/g, "").slice(0, 10).trim(),
+  };
+}
+
+function getCheckoutFieldError(fieldName, sanitizedValues) {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+  if (fieldName === "name") {
+    if (!sanitizedValues.name) {
+      return "Please enter your full name.";
+    }
+
+    if (sanitizedValues.name.length > 60) {
+      return "Name must be 60 characters or fewer.";
+    }
+
+    return "";
+  }
+
+  if (fieldName === "email") {
+    if (!sanitizedValues.email) {
+      return "Please enter your email address.";
+    }
+
+    if (!emailRegex.test(sanitizedValues.email)) {
+      return "Please enter a valid email address.";
+    }
+
+    return "";
+  }
+
+  if (fieldName === "phone") {
+    if (!sanitizedValues.phone) {
+      return "Please enter your mobile number.";
+    }
+
+    if (sanitizedValues.phone.length !== 10) {
+      return "Mobile number 10 digits ka hona chahiye.";
+    }
+
+    return "";
+  }
+
+  return "";
+}
+
+function validateCheckoutForm(formValues) {
+  const sanitized = sanitizeCheckoutForm(formValues);
+
+  return {
+    sanitized,
+    errors: {
+      name: getCheckoutFieldError("name", sanitized),
+      email: getCheckoutFieldError("email", sanitized),
+      phone: getCheckoutFieldError("phone", sanitized),
+    },
+  };
+}
+
 function SectionHeading({ eyebrow, title, description }) {
   return (
     <motion.div
@@ -499,6 +566,7 @@ function MagneticButton({
   variant = "primary",
   className = "",
   children,
+  ...rest
 }) {
   const [offset, setOffset] = useState({ x: 0, y: 0 });
 
@@ -527,6 +595,7 @@ function MagneticButton({
     animate: { x: disabled ? 0 : offset.x, y: disabled ? 0 : offset.y },
     transition: { type: "spring", stiffness: 260, damping: 18, mass: 0.35 },
     whileTap: disabled ? undefined : { scale: 0.985 },
+    ...rest,
   };
 
   if (href) {
@@ -541,6 +610,61 @@ function MagneticButton({
     <motion.button type={type} disabled={disabled} {...motionProps}>
       {children}
     </motion.button>
+  );
+}
+
+function CheckoutField({
+  id,
+  name,
+  label,
+  type,
+  value,
+  onChange,
+  onBlur,
+  placeholder,
+  autoComplete,
+  inputMode,
+  error,
+}) {
+  return (
+    <label htmlFor={id} className="block">
+      <span className="text-sm font-medium text-slate-200">{label}</span>
+      <div
+        className={`mt-2 rounded-[22px] border backdrop-blur-xl transition duration-300 ${
+          error
+            ? "border-rose-400/55 bg-rose-500/[0.07] shadow-[0_0_0_1px_rgba(251,113,133,0.14),0_18px_44px_rgba(15,23,42,0.36)]"
+            : "border-white/10 bg-white/[0.04] shadow-[0_0_0_1px_rgba(255,255,255,0.03),0_18px_44px_rgba(15,23,42,0.28)]"
+        } focus-within:-translate-y-0.5 focus-within:border-cyan-300/55 focus-within:bg-white/[0.08] focus-within:shadow-[0_0_0_1px_rgba(34,211,238,0.24),0_0_36px_rgba(34,211,238,0.12),0_20px_54px_rgba(15,23,42,0.38)]`}
+      >
+        <input
+          id={id}
+          name={name}
+          type={type}
+          value={value}
+          onChange={onChange}
+          onBlur={onBlur}
+          autoComplete={autoComplete}
+          inputMode={inputMode}
+          placeholder={placeholder}
+          aria-invalid={Boolean(error)}
+          aria-describedby={error ? `${id}-error` : undefined}
+          className="h-14 w-full rounded-[22px] bg-transparent px-4 text-base text-white outline-none placeholder:text-slate-500"
+        />
+      </div>
+      <AnimatePresence initial={false}>
+        {error ? (
+          <motion.p
+            id={`${id}-error`}
+            initial={{ opacity: 0, y: -6 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -6 }}
+            className="mt-2 text-sm text-rose-200"
+          >
+            {error}
+          </motion.p>
+        ) : null}
+      </AnimatePresence>
+    </label>
   );
 }
 
@@ -1296,8 +1420,10 @@ function DemoPreview({ activeScene }) {
 export default function App() {
   const [menuOpen, setMenuOpen] = useState(false);
   const [activeLegal, setActiveLegal] = useState(null);
+  const [checkoutModalOpen, setCheckoutModalOpen] = useState(false);
   const [toast, setToast] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState(createEmptyFieldErrors);
   const [form, setForm] = useState({ name: "", email: "", phone: "" });
   const [currentHash, setCurrentHash] = useState(() =>
     typeof window === "undefined" ? "" : window.location.hash
@@ -1318,19 +1444,39 @@ export default function App() {
   }, [toast]);
 
   useEffect(() => {
-    if (!activeLegal) {
+    if (!activeLegal && !checkoutModalOpen) {
       return undefined;
     }
 
+    const previousBodyOverflow = document.body.style.overflow;
+    const previousDocumentOverflow = document.documentElement.style.overflow;
+
     const handleEscape = (event) => {
-      if (event.key === "Escape") {
+      if (event.key !== "Escape") {
+        return;
+      }
+
+      if (checkoutModalOpen) {
+        if (!isSubmitting) {
+          setCheckoutModalOpen(false);
+        }
+        return;
+      }
+
+      if (activeLegal) {
         setActiveLegal(null);
       }
     };
 
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
     window.addEventListener("keydown", handleEscape);
-    return () => window.removeEventListener("keydown", handleEscape);
-  }, [activeLegal]);
+    return () => {
+      document.body.style.overflow = previousBodyOverflow;
+      document.documentElement.style.overflow = previousDocumentOverflow;
+      window.removeEventListener("keydown", handleEscape);
+    };
+  }, [activeLegal, checkoutModalOpen, isSubmitting]);
 
   useEffect(() => {
     const syncHash = () => setCurrentHash(window.location.hash);
@@ -1341,32 +1487,45 @@ export default function App() {
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
+    const nextValue = name === "phone" ? value.replace(/\D/g, "").slice(0, 10) : value;
+
     setForm((current) => ({
       ...current,
+      [name]: nextValue,
+    }));
+    setFieldErrors((current) =>
+      current[name] ? { ...current, [name]: "" } : current
+    );
+  };
+
+  const handleFieldBlur = (event) => {
+    const { name, value } = event.target;
+    const sanitized = sanitizeCheckoutForm({
+      ...form,
       [name]: name === "phone" ? value.replace(/\D/g, "").slice(0, 10) : value,
+    });
+
+    setForm((current) => ({
+      ...current,
+      [name]: sanitized[name],
+    }));
+    setFieldErrors((current) => ({
+      ...current,
+      [name]: getCheckoutFieldError(name, sanitized),
     }));
   };
 
   const handlePayment = async (event) => {
     event.preventDefault();
 
-    const cleanedPhone = form.phone.replace(/\D/g, "").trim();
-    const cleanedEmail = form.email.trim().toLowerCase();
-    const cleanedName = form.name.trim().replace(/\s+/g, " ");
+    const { sanitized, errors } = validateCheckoutForm(form);
+    const hasErrors = Object.values(errors).some(Boolean);
 
-    if (!cleanedName || !cleanedEmail || !cleanedPhone) {
-      setToast("Please fill your name, email aur mobile number.");
-      return;
-    }
+    setForm(sanitized);
+    setFieldErrors(errors);
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(cleanedEmail)) {
-      setToast("Please enter a valid email address.");
-      return;
-    }
-
-    if (cleanedPhone.length !== 10) {
-      setToast("Mobile number 10 digits ka hona chahiye.");
+    if (hasErrors) {
+      setToast("Please review the highlighted checkout details.");
       return;
     }
 
@@ -1377,9 +1536,9 @@ export default function App() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          name: cleanedName,
-          email: cleanedEmail,
-          phone: cleanedPhone,
+          name: sanitized.name,
+          email: sanitized.email,
+          phone: sanitized.phone,
         }),
       });
 
@@ -1402,6 +1561,18 @@ export default function App() {
   };
 
   const closeMenu = () => setMenuOpen(false);
+  const openCheckoutModal = () => {
+    setMenuOpen(false);
+    setFieldErrors(createEmptyFieldErrors());
+    setCheckoutModalOpen(true);
+  };
+  const closeCheckoutModal = () => {
+    if (isSubmitting) {
+      return;
+    }
+
+    setCheckoutModalOpen(false);
+  };
   const paymentRoute = getPaymentRouteFromHash(currentHash);
 
   if (paymentRoute.page) {
@@ -1455,7 +1626,13 @@ export default function App() {
           </nav>
 
           <div className="hidden lg:block">
-            <MagneticButton href="#payment" className="pulse-button">
+            <MagneticButton
+              onClick={openCheckoutModal}
+              aria-controls="checkout-modal"
+              aria-expanded={checkoutModalOpen}
+              aria-haspopup="dialog"
+              className="pulse-button"
+            >
               Join Live Course — {COURSE_PRICE_LABEL}
             </MagneticButton>
           </div>
@@ -1531,7 +1708,13 @@ export default function App() {
                 >
                   FAQ
                 </a>
-                <MagneticButton href="#payment" onClick={closeMenu} className="justify-center text-center">
+                <MagneticButton
+                  onClick={openCheckoutModal}
+                  aria-controls="checkout-modal"
+                  aria-expanded={checkoutModalOpen}
+                  aria-haspopup="dialog"
+                  className="justify-center text-center"
+                >
                   Join Live Course — {COURSE_PRICE_LABEL}
                 </MagneticButton>
               </div>
@@ -1577,7 +1760,13 @@ export default function App() {
             </div>
 
             <div className="mt-8 flex flex-col gap-4 sm:flex-row">
-              <MagneticButton href="#payment" className="pulse-button justify-center text-center">
+              <MagneticButton
+                onClick={openCheckoutModal}
+                aria-controls="checkout-modal"
+                aria-expanded={checkoutModalOpen}
+                aria-haspopup="dialog"
+                className="pulse-button justify-center text-center"
+              >
                 Join Live Course — {COURSE_PRICE_LABEL}
               </MagneticButton>
               <MagneticButton
@@ -2183,50 +2372,45 @@ export default function App() {
                   </div>
 
                   <form onSubmit={handlePayment} className="space-y-5">
-                    <div>
-                      <label htmlFor="name" className="text-sm text-slate-300">
-                        Full Name
-                      </label>
-                      <input
-                        id="name"
-                        name="name"
-                        type="text"
-                        value={form.name}
-                        onChange={handleInputChange}
-                        placeholder="Enter your full name"
-                        className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3.5 text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400/40 focus:bg-white/[0.08]"
-                      />
-                    </div>
+                    <CheckoutField
+                      id="payment-name"
+                      name="name"
+                      label="Full Name"
+                      type="text"
+                      value={form.name}
+                      onChange={handleInputChange}
+                      onBlur={handleFieldBlur}
+                      placeholder="Enter your full name"
+                      autoComplete="name"
+                      error={fieldErrors.name}
+                    />
 
-                    <div>
-                      <label htmlFor="email" className="text-sm text-slate-300">
-                        Email Address
-                      </label>
-                      <input
-                        id="email"
-                        name="email"
-                        type="email"
-                        value={form.email}
-                        onChange={handleInputChange}
-                        placeholder="Enter your email"
-                        className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3.5 text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400/40 focus:bg-white/[0.08]"
-                      />
-                    </div>
+                    <CheckoutField
+                      id="payment-email"
+                      name="email"
+                      label="Email Address"
+                      type="email"
+                      value={form.email}
+                      onChange={handleInputChange}
+                      onBlur={handleFieldBlur}
+                      placeholder="Enter your email"
+                      autoComplete="email"
+                      error={fieldErrors.email}
+                    />
 
-                    <div>
-                      <label htmlFor="phone" className="text-sm text-slate-300">
-                        Mobile Number
-                      </label>
-                      <input
-                        id="phone"
-                        name="phone"
-                        type="tel"
-                        value={form.phone}
-                        onChange={handleInputChange}
-                        placeholder="10-digit mobile number"
-                        className="mt-2 w-full rounded-2xl border border-white/10 bg-white/[0.05] px-4 py-3.5 text-white outline-none transition placeholder:text-slate-500 focus:border-cyan-400/40 focus:bg-white/[0.08]"
-                      />
-                    </div>
+                    <CheckoutField
+                      id="payment-phone"
+                      name="phone"
+                      label="Mobile Number"
+                      type="tel"
+                      value={form.phone}
+                      onChange={handleInputChange}
+                      onBlur={handleFieldBlur}
+                      placeholder="10-digit mobile number"
+                      autoComplete="tel"
+                      inputMode="numeric"
+                      error={fieldErrors.phone}
+                    />
 
                     <MagneticButton
                       type="submit"
@@ -2235,7 +2419,7 @@ export default function App() {
                     >
                       {isSubmitting
                         ? "Securing your PayU session..."
-                        : "Join Live Course — ₹499"}
+                        : `Join Live Course — ${COURSE_PRICE_LABEL}`}
                     </MagneticButton>
 
                     <p className="text-sm leading-6 text-slate-400">
@@ -2333,11 +2517,172 @@ export default function App() {
             <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Live Course</p>
             <p className="font-display text-xl text-white">{COURSE_PRICE_LABEL}</p>
           </div>
-          <MagneticButton href="#payment" className="pulse-button min-w-[220px] justify-center text-center">
+          <MagneticButton
+            onClick={openCheckoutModal}
+            aria-controls="checkout-modal"
+            aria-expanded={checkoutModalOpen}
+            aria-haspopup="dialog"
+            className="pulse-button min-w-[220px] justify-center text-center"
+          >
             Join Live Course
           </MagneticButton>
         </div>
       </div>
+
+      <AnimatePresence>
+        {checkoutModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.24 }}
+            className="fixed inset-0 z-[70] overflow-y-auto bg-[#020617]/78 px-3 py-3 backdrop-blur-xl sm:px-4 sm:py-6"
+            onClick={closeCheckoutModal}
+          >
+            <div className="flex min-h-full items-center justify-center">
+              <motion.div
+                id="checkout-modal"
+                role="dialog"
+                aria-modal="true"
+                aria-labelledby="checkout-modal-title"
+                aria-describedby="checkout-modal-subtitle"
+                initial={{ opacity: 0, y: 28, scale: 0.94 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 18, scale: 0.96 }}
+                transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+                className="relative w-full max-w-lg overflow-hidden rounded-[30px] border border-white/12 bg-[linear-gradient(180deg,_rgba(15,23,42,0.94),_rgba(2,6,23,0.92))] shadow-[0_44px_120px_rgba(2,6,23,0.72),0_0_0_1px_rgba(255,255,255,0.04)]"
+                onClick={(event) => event.stopPropagation()}
+              >
+                <div className="pointer-events-none absolute inset-x-8 top-0 h-px bg-[linear-gradient(90deg,_transparent,_rgba(103,232,249,0.82),_rgba(168,85,247,0.9),_transparent)]" />
+                <div className="pointer-events-none absolute -left-12 top-14 h-28 w-28 rounded-full bg-violet-500/18 blur-3xl" />
+                <div className="pointer-events-none absolute -right-10 bottom-10 h-32 w-32 rounded-full bg-cyan-400/16 blur-3xl" />
+
+                <div className="relative max-h-[calc(100dvh-1.5rem)] overflow-y-auto overscroll-contain p-5 sm:p-6">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="max-w-md">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.32em] text-cyan-200/85">
+                        Secure Enrollment
+                      </p>
+                      <h3
+                        id="checkout-modal-title"
+                        className="mt-3 font-display text-2xl text-white sm:text-3xl"
+                      >
+                        Join AI Coding Live Course
+                      </h3>
+                      <p
+                        id="checkout-modal-subtitle"
+                        className="mt-3 text-sm leading-6 text-slate-300 sm:text-base"
+                      >
+                        Enter your details to continue secure PayU checkout.
+                      </p>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={closeCheckoutModal}
+                      disabled={isSubmitting}
+                      aria-label="Close checkout modal"
+                      className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/5 text-white transition hover:border-cyan-300/35 hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      X
+                    </button>
+                  </div>
+
+                  <form onSubmit={handlePayment} className="mt-6 space-y-4">
+                    <CheckoutField
+                      id="checkout-name"
+                      name="name"
+                      label="Full Name"
+                      type="text"
+                      value={form.name}
+                      onChange={handleInputChange}
+                      onBlur={handleFieldBlur}
+                      placeholder="Enter your full name"
+                      autoComplete="name"
+                      error={fieldErrors.name}
+                    />
+
+                    <CheckoutField
+                      id="checkout-phone"
+                      name="phone"
+                      label="Mobile Number"
+                      type="tel"
+                      value={form.phone}
+                      onChange={handleInputChange}
+                      onBlur={handleFieldBlur}
+                      placeholder="10-digit mobile number"
+                      autoComplete="tel"
+                      inputMode="numeric"
+                      error={fieldErrors.phone}
+                    />
+
+                    <CheckoutField
+                      id="checkout-email"
+                      name="email"
+                      label="Email Address"
+                      type="email"
+                      value={form.email}
+                      onChange={handleInputChange}
+                      onBlur={handleFieldBlur}
+                      placeholder="Enter your email"
+                      autoComplete="email"
+                      error={fieldErrors.email}
+                    />
+
+                    <div className="rounded-[26px] border border-white/10 bg-white/[0.04] p-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.04)] sm:p-5">
+                      <div className="flex items-start justify-between gap-4">
+                        <div>
+                          <p className="text-xs uppercase tracking-[0.24em] text-slate-400">
+                            Price
+                          </p>
+                          <p className="mt-2 font-display text-4xl text-white">
+                            {COURSE_PRICE_LABEL}
+                          </p>
+                        </div>
+
+                        <div className="rounded-2xl border border-cyan-400/20 bg-cyan-400/[0.08] px-3 py-2 text-right text-[11px] font-semibold uppercase tracking-[0.22em] text-cyan-100">
+                          Secure PayU Checkout
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex flex-wrap gap-2.5">
+                        {paymentMethods.map((method) => (
+                          <div
+                            key={method}
+                            className="inline-flex min-h-[40px] items-center rounded-full border border-white/10 bg-slate-950/60 px-4 text-sm text-slate-200"
+                          >
+                            {method}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <MagneticButton
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="w-full min-h-[56px] justify-center rounded-[22px] text-base shadow-[0_22px_55px_rgba(124,58,237,0.34)]"
+                    >
+                      {isSubmitting ? (
+                        <>
+                          <span className="h-4 w-4 animate-spin rounded-full border-2 border-white/25 border-t-white" />
+                          Securing your PayU session...
+                        </>
+                      ) : (
+                        "Proceed to Secure Payment"
+                      )}
+                    </MagneticButton>
+
+                    <p className="text-center text-sm leading-6 text-slate-400">
+                      Your details stay encrypted and payment happens on PayU's
+                      hosted checkout.
+                    </p>
+                  </form>
+                </div>
+              </motion.div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <AnimatePresence>
         {activeLegal && (
