@@ -1,12 +1,8 @@
-export function submitPayuForm(action, fields) {
-  if (typeof document === "undefined") {
-    throw new Error(
-      "PayU redirect failure: the browser context is unavailable."
-    );
-  }
+export const LIVE_PAYU_PAYMENT_URL = "https://secure.payu.in/_payment";
 
-  if (!fields || typeof fields !== "object" || Array.isArray(fields)) {
-    throw new Error("PayU redirect failure: missing payment form fields.");
+function resolveLivePayuAction(action) {
+  if (typeof action !== "string" || !action.trim()) {
+    throw new Error("PayU redirect failure: the payment URL is missing.");
   }
 
   let paymentUrl;
@@ -21,9 +17,31 @@ export function submitPayuForm(action, fields) {
     throw new Error("PayU redirect failure: received an unsupported payment URL.");
   }
 
+  if (paymentUrl.toString() !== LIVE_PAYU_PAYMENT_URL) {
+    throw new Error(
+      `PayU redirect failure: expected ${LIVE_PAYU_PAYMENT_URL} but received ${paymentUrl.toString()}.`
+    );
+  }
+
+  return LIVE_PAYU_PAYMENT_URL;
+}
+
+export function submitPayuForm(action, fields) {
+  if (typeof document === "undefined") {
+    throw new Error(
+      "PayU redirect failure: the browser context is unavailable."
+    );
+  }
+
+  if (!fields || typeof fields !== "object" || Array.isArray(fields)) {
+    throw new Error("PayU redirect failure: missing payment form fields.");
+  }
+
+  const livePayuAction = resolveLivePayuAction(action);
+
   const form = document.createElement("form");
   form.method = "POST";
-  form.action = paymentUrl.toString();
+  form.action = livePayuAction;
   form.style.display = "none";
 
   Object.entries(fields).forEach(([key, value]) => {

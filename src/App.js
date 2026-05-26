@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import PaymentStatusPage from "./components/PaymentStatusPage";
-import { submitPayuForm } from "./lib/payu";
+import { LIVE_PAYU_PAYMENT_URL, submitPayuForm } from "./lib/payu";
 
 const COURSE_NAME = "AI Tools Se Website Bana Kar Clients Se Paise Kamao";
 const COURSE_PRICE = "499.00";
 const COURSE_PRICE_LABEL = `₹${COURSE_PRICE.replace(".00", "")}`;
 const assetPath = (fileName) => `${process.env.PUBLIC_URL}/assets/${fileName}`;
-const DEFAULT_API_BASE_URL = "https://portfolio-course.onrender.com";
-const API_BASE_URL = (
-  process.env.REACT_APP_API_URL || DEFAULT_API_BASE_URL
-).replace(/\/+$/, "");
+const API_BASE_URL = "https://portfolio-course.onrender.com";
 const PAYU_CREATE_PAYMENT_PATH = "/api/payu/create-payment";
 const PAYMENT_REQUEST_TIMEOUT_MS = 15000;
 
@@ -56,9 +53,18 @@ function validatePaymentSession(payment) {
     );
   }
 
-  if (typeof payment.paymentUrl !== "string" || !payment.paymentUrl.trim()) {
+  const paymentUrl =
+    typeof payment.paymentUrl === "string" ? payment.paymentUrl.trim() : "";
+
+  if (!paymentUrl) {
     throw new PaymentRequestError(
       "PayU redirect failure: the payment URL is missing."
+    );
+  }
+
+  if (paymentUrl !== LIVE_PAYU_PAYMENT_URL) {
+    throw new PaymentRequestError(
+      `PayU redirect failure: expected ${LIVE_PAYU_PAYMENT_URL} but received ${paymentUrl}.`
     );
   }
 
@@ -68,7 +74,10 @@ function validatePaymentSession(payment) {
     );
   }
 
-  return payment;
+  return {
+    ...payment,
+    paymentUrl: LIVE_PAYU_PAYMENT_URL,
+  };
 }
 
 async function createPaymentSession(payload) {
@@ -1662,10 +1671,10 @@ export default function App() {
       });
 
       setToast("Redirecting to secure PayU checkout...");
-      console.log("[Checkout] Payment redirect URL:", payment.paymentUrl);
+      console.log("[Checkout] Payment redirect URL:", LIVE_PAYU_PAYMENT_URL);
 
       // PayU hosted checkout expects a standard HTML form POST, not a fetch/XHR.
-      submitPayuForm(payment.paymentUrl, payment.fields);
+      submitPayuForm(LIVE_PAYU_PAYMENT_URL, payment.fields);
     } catch (error) {
       console.error("[Checkout] Payment request failed:", error);
       setToast(error.message || "Something went wrong. Please try again.");
@@ -2470,12 +2479,12 @@ export default function App() {
                       </p>
                     </div>
                     <div className="rounded-full border border-white/10 px-3 py-1 text-[11px] uppercase tracking-[0.22em] text-slate-300">
-                      Test Mode
+                      Live Mode
                     </div>
                   </div>
 
                   <div className="mb-6 grid gap-3 sm:grid-cols-3">
-                    {["Backend Hash", "Mobile Ready", "PayU Test"].map((item) => (
+                    {["Backend Hash", "Mobile Ready", "PayU Live"].map((item) => (
                       <div
                         key={item}
                         className="rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-center text-xs uppercase tracking-[0.22em] text-slate-200"
