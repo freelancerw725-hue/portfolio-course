@@ -24,6 +24,8 @@ router.post("/create-payment", (req, res) => {
 
     const payment = buildPaymentPayload(validation.data);
 
+    console.log("[PayU] FINAL PAYMENT URL:", payment.paymentUrl);
+
     return res.json({
       success: true,
       paymentUrl: payment.paymentUrl,

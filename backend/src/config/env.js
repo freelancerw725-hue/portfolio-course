@@ -9,6 +9,7 @@ const cleanEnvValue = (value) =>
     ? value.replace(/[\u200B-\u200D\uFEFF\r\n]+/g, "").trim()
     : "";
 const EXPECTED_TEST_PAYU_KEY = "bkOP0F";
+const DEFAULT_PAYU_BASE_URL = "https://secure.payu.in/_payment";
 
 console.log("PAYU_KEY ACTIVE:", cleanEnvValue(process.env.PAYU_KEY));
 console.log("PAYU_SALT ACTIVE:", cleanEnvValue(process.env.PAYU_SALT));
@@ -36,11 +37,31 @@ function validatePayuKey(rawValue, payuMode) {
 }
 
 const port = Number(process.env.PORT || 5000);
+const payuModeRaw = cleanEnvValue(process.env.PAYU_MODE).toLowerCase();
 const payuMode =
-  process.env.PAYU_MODE &&
-  process.env.PAYU_MODE.toLowerCase() === "production"
-    ? "production"
-    : "test";
+  payuModeRaw === "production" || payuModeRaw === "live" ? "live" : "test";
+
+function validatePayuBaseUrl(rawValue) {
+  const payuBaseUrl = cleanEnvValue(rawValue) || DEFAULT_PAYU_BASE_URL;
+
+  try {
+    const parsed = new URL(payuBaseUrl);
+
+    if (parsed.protocol !== "https:") {
+      throw new Error("PAYU_BASE_URL must use https.");
+    }
+
+    if (!parsed.pathname.endsWith("/_payment")) {
+      throw new Error('PAYU_BASE_URL must end with "/_payment".');
+    }
+  } catch (error) {
+    throw new Error(
+      `Invalid PAYU_BASE_URL value: ${error.message || String(error)}`
+    );
+  }
+
+  return payuBaseUrl;
+}
 
 const config = {
   port,
@@ -53,11 +74,14 @@ const config = {
   payuMode,
   payuKey: validatePayuKey(process.env.PAYU_KEY, payuMode),
   payuSalt: cleanEnvValue(process.env.PAYU_SALT),
+  payuBaseUrl: validatePayuBaseUrl(process.env.PAYU_BASE_URL),
   payuAmount: cleanEnvValue(process.env.PAYU_AMOUNT) || "499",
   payuProductInfo:
     cleanEnvValue(process.env.PAYU_PRODUCT_INFO) ||
     "AI Tools Se Website Bana Kar Clients Se Paise Kamao",
 };
+
+console.log("PAYU BASE URL ACTIVE:", config.payuBaseUrl);
 
 const missingEnvVars = ["PAYU_KEY", "PAYU_SALT"].filter(
   (key) => !cleanEnvValue(process.env[key])

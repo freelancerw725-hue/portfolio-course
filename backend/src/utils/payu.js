@@ -1,11 +1,6 @@
 const crypto = require("crypto");
 const config = require("../config/env");
 
-const PAYU_BASE_URLS = {
-  test: "https://test.payu.in/_payment",
-  production: "https://secure.payu.in/_payment",
-};
-
 const sha512 = (value) =>
   crypto.createHash("sha512").update(value).digest("hex");
 
@@ -190,8 +185,8 @@ function buildPaymentPayload({ name, email, phone }) {
 
   return {
     // Replace PAYU_KEY and PAYU_SALT in backend/.env with live dashboard
-    // credentials, then switch PAYU_MODE=production to move this to live.
-    paymentUrl: PAYU_BASE_URLS[config.payuMode],
+    // credentials, then set PAYU_MODE=live on the server.
+    paymentUrl: config.payuBaseUrl,
     fields: finalFields,
     meta: {
       mode: config.payuMode,
