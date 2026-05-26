@@ -93,7 +93,12 @@ async function createPaymentSession(payload) {
     });
     const payment = await parsePaymentResponse(response);
 
-    console.log("[Checkout] Backend response:", payment);
+    console.log("[Checkout] Backend response:", {
+      success: payment.success,
+      paymentUrl: payment.paymentUrl,
+      course: payment.course,
+      hasFields: Boolean(payment.fields),
+    });
 
     if (!response.ok) {
       throw new PaymentRequestError(

@@ -56,15 +56,14 @@ function buildRequestHashString({
     salt: normalizeHashField(salt, "salt"),
   };
 
+  // PayU requires this request hash order exactly:
+  // key|txnid|amount|productinfo|firstname|email|||||||||||salt
   return `${normalizedValues.key}|${normalizedValues.txnid}|${normalizedValues.amount}|${normalizedValues.productinfo}|${normalizedValues.firstname}|${normalizedValues.email}|||||||||||${normalizedValues.salt}`;
 }
 
 function generateRequestHash(payload) {
   const hashString = buildRequestHashString(payload);
   const hash = sha512(hashString);
-
-  console.log("[PayU] Generated request hash string:", hashString);
-  console.log("[PayU] Generated request hash:", hash);
 
   return {
     hashString,
@@ -155,7 +154,7 @@ function buildPaymentPayload({ name, email, phone }) {
     furl: `${config.backendBaseUrl}/api/payu/failure`,
   };
 
-  const { hash } = generateRequestHash({
+  const { hash, hashString } = generateRequestHash({
     key: fields.key,
     txnid: fields.txnid,
     amount: fields.amount,
@@ -170,13 +169,14 @@ function buildPaymentPayload({ name, email, phone }) {
     hash,
   };
 
-  console.log(
-    "[PayU] Final payload returned for browser submission:",
-    JSON.stringify({
-      paymentUrl: PAYU_BASE_URLS[config.payuMode],
-      fields: finalFields,
-    })
-  );
+  console.log("[PayU] Generated payment payload:", {
+    key: finalFields.key,
+    txnid: finalFields.txnid,
+    amount: finalFields.amount,
+    firstname: finalFields.firstname,
+    email: finalFields.email,
+    hashString,
+  });
 
   return {
     // Replace PAYU_KEY and PAYU_SALT in backend/.env with live dashboard
