@@ -7,6 +7,125 @@ const COURSE_NAME = "AI Tools Se Website Bana Kar Clients Se Paise Kamao";
 const COURSE_PRICE = "499.00";
 const COURSE_PRICE_LABEL = `₹${COURSE_PRICE.replace(".00", "")}`;
 const assetPath = (fileName) => `${process.env.PUBLIC_URL}/assets/${fileName}`;
+const DEFAULT_API_BASE_URL = "https://portfolio-course.onrender.com";
+const API_BASE_URL = (
+  process.env.REACT_APP_API_URL || DEFAULT_API_BASE_URL
+).replace(/\/+$/, "");
+const PAYU_CREATE_PAYMENT_PATH = "/api/payu/create-payment";
+const PAYMENT_REQUEST_TIMEOUT_MS = 15000;
+
+class PaymentRequestError extends Error {
+  constructor(message) {
+    super(message);
+    this.name = "PaymentRequestError";
+  }
+}
+
+function getCreatePaymentUrl() {
+  return `${API_BASE_URL}${PAYU_CREATE_PAYMENT_PATH}`;
+}
+
+async function parsePaymentResponse(response) {
+  const contentType = response.headers.get("content-type") || "";
+
+  if (!contentType.toLowerCase().includes("application/json")) {
+    throw new PaymentRequestError(
+      "The payment service returned an invalid response."
+    );
+  }
+
+  try {
+    return await response.json();
+  } catch (_error) {
+    throw new PaymentRequestError(
+      "The payment service returned invalid JSON."
+    );
+  }
+}
+
+function validatePaymentSession(payment) {
+  if (!payment || typeof payment !== "object") {
+    throw new PaymentRequestError(
+      "The payment service returned an invalid response."
+    );
+  }
+
+  if (!payment.success) {
+    throw new PaymentRequestError(
+      payment.message || "Could not start the PayU checkout."
+    );
+  }
+
+  if (typeof payment.paymentUrl !== "string" || !payment.paymentUrl.trim()) {
+    throw new PaymentRequestError(
+      "PayU redirect failure: the payment URL is missing."
+    );
+  }
+
+  if (!payment.fields || typeof payment.fields !== "object") {
+    throw new PaymentRequestError(
+      "PayU redirect failure: the payment form fields are missing."
+    );
+  }
+
+  return payment;
+}
+
+async function createPaymentSession(payload) {
+  const controller = new AbortController();
+  const timeoutId = window.setTimeout(
+    () => controller.abort(),
+    PAYMENT_REQUEST_TIMEOUT_MS
+  );
+  const endpoint = getCreatePaymentUrl();
+
+  console.log("[Checkout] API URL used:", API_BASE_URL);
+  console.log("[Checkout] Payment request start:", endpoint);
+
+  try {
+    const response = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+    const payment = await parsePaymentResponse(response);
+
+    console.log("[Checkout] Backend response:", payment);
+
+    if (!response.ok) {
+      throw new PaymentRequestError(
+        payment.message || "Could not start the PayU checkout."
+      );
+    }
+
+    return validatePaymentSession(payment);
+  } catch (error) {
+    if (error.name === "AbortError") {
+      throw new PaymentRequestError(
+        "The payment request timed out. Please try again."
+      );
+    }
+
+    if (error instanceof PaymentRequestError) {
+      throw error;
+    }
+
+    if (error instanceof TypeError) {
+      throw new PaymentRequestError(
+        "The backend is offline or unreachable right now. Please try again."
+      );
+    }
+
+    throw new PaymentRequestError(
+      "Unable to start the PayU checkout right now. Please try again."
+    );
+  } finally {
+    window.clearTimeout(timeoutId);
+  }
+}
 
 const visualAssets = {
   builder: {
@@ -1429,11 +1548,6 @@ export default function App() {
     typeof window === "undefined" ? "" : window.location.hash
   );
 
-  const apiBase = (process.env.REACT_APP_API_URL || "http://localhost:5000").replace(
-    /\/+$/,
-    ""
-  );
-
   useEffect(() => {
     if (!toast) {
       return undefined;
@@ -1485,6 +1599,10 @@ export default function App() {
     return () => window.removeEventListener("hashchange", syncHash);
   }, []);
 
+  useEffect(() => {
+    console.log("[Checkout] API URL used:", API_BASE_URL);
+  }, []);
+
   const handleInputChange = (event) => {
     const { name, value } = event.target;
     const nextValue = name === "phone" ? value.replace(/\D/g, "").slice(0, 10) : value;
@@ -1532,28 +1650,19 @@ export default function App() {
     setIsSubmitting(true);
 
     try {
-      const response = await fetch(`${apiBase}/api/payu/create-payment`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: sanitized.name,
-          email: sanitized.email,
-          phone: sanitized.phone,
-        }),
+      const payment = await createPaymentSession({
+        name: sanitized.name,
+        email: sanitized.email,
+        phone: sanitized.phone,
       });
 
-      const payment = await response.json();
-
-      if (!response.ok || !payment.success) {
-        throw new Error(payment.message || "Could not start the PayU checkout.");
-      }
-
       setToast("Redirecting to secure PayU checkout...");
+      console.log("[Checkout] Payment redirect URL:", payment.paymentUrl);
 
       // PayU hosted checkout expects a standard HTML form POST, not a fetch/XHR.
       submitPayuForm(payment.paymentUrl, payment.fields);
     } catch (error) {
-      console.error(error);
+      console.error("[Checkout] Payment request failed:", error);
       setToast(error.message || "Something went wrong. Please try again.");
     } finally {
       setIsSubmitting(false);
@@ -2528,10 +2637,10 @@ export default function App() {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.24 }}
-            className="fixed inset-0 z-[70] overflow-hidden bg-[#020617]/80 px-2 py-3 backdrop-blur-xl sm:px-4 sm:py-6"
+            className="fixed inset-0 z-[70] overflow-x-hidden overflow-y-auto overscroll-contain bg-[#020617]/80 px-2 py-3 backdrop-blur-xl sm:px-4 sm:py-6"
             onClick={closeCheckoutModal}
           >
-            <div className="flex min-h-full items-center justify-center">
+            <div className="flex min-h-full w-full items-center justify-center">
               <motion.div
                 id="checkout-modal"
                 role="dialog"

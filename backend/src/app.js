@@ -8,15 +8,25 @@ const app = express();
 
 const allowedOrigins = new Set([
   config.frontendBaseUrl,
+  "http://localhost:3000",
   "http://127.0.0.1:3000",
+  "https://portfolio-course.vercel.app",
 ]);
+const vercelPreviewOriginPattern =
+  /^https:\/\/portfolio-course(?:-[a-z0-9-]+)?\.vercel\.app$/;
+
+function isAllowedOrigin(origin) {
+  return (
+    allowedOrigins.has(origin) || vercelPreviewOriginPattern.test(origin)
+  );
+}
 
 app.disable("x-powered-by");
 
 app.use(
   cors({
     origin(origin, callback) {
-      if (!origin || allowedOrigins.has(origin)) {
+      if (!origin || isAllowedOrigin(origin)) {
         return callback(null, true);
       }
 
