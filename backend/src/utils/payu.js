@@ -13,13 +13,23 @@ const createTxnId = () =>
   `TXN${Date.now()}${crypto.randomBytes(4).toString("hex").toUpperCase()}`;
 
 const formatAmount = (value) => {
-  const parsedAmount = Number(value);
+  // PayU hash validation is sensitive to amount formatting. We always send an
+  // integer amount string like "499" (not "499.00") and use the same value
+  // in the hash string.
+  const amount = String(value).replace(".00", "").trim();
+  const parsedAmount = Number(amount);
 
   if (!Number.isFinite(parsedAmount) || parsedAmount <= 0) {
     throw new Error("PAYU_AMOUNT must be a valid positive number.");
   }
 
-  return parsedAmount.toFixed(2);
+  if (amount.includes(".")) {
+    throw new Error(
+      'PAYU_AMOUNT must not include decimals. Use "499" or "499.00".'
+    );
+  }
+
+  return amount;
 };
 
 const normalizeHashField = (value, fieldName) => {

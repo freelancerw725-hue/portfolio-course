@@ -3,14 +3,15 @@ const dotenv = require("dotenv");
 
 dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 
-console.log("PAYU_KEY ACTIVE:", process.env.PAYU_KEY);
-
 const stripTrailingSlash = (value) => value.replace(/\/+$/, "");
 const cleanEnvValue = (value) =>
   typeof value === "string"
     ? value.replace(/[\u200B-\u200D\uFEFF\r\n]+/g, "").trim()
     : "";
 const EXPECTED_TEST_PAYU_KEY = "bkOP0F";
+
+console.log("PAYU_KEY ACTIVE:", cleanEnvValue(process.env.PAYU_KEY));
+console.log("PAYU_SALT ACTIVE:", cleanEnvValue(process.env.PAYU_SALT));
 
 function validatePayuKey(rawValue, payuMode) {
   const payuKey = cleanEnvValue(rawValue);
@@ -44,15 +45,15 @@ const payuMode =
 const config = {
   port,
   frontendBaseUrl: stripTrailingSlash(
-    process.env.FRONTEND_BASE_URL || "http://localhost:3000"
+    process.env.FRONTEND_BASE_URL || "https://portfolio-course.vercel.app"
   ),
   backendBaseUrl: stripTrailingSlash(
-    process.env.BACKEND_BASE_URL || `http://localhost:${port}`
+    process.env.BACKEND_BASE_URL || "https://portfolio-course.onrender.com"
   ),
   payuMode,
   payuKey: validatePayuKey(process.env.PAYU_KEY, payuMode),
   payuSalt: cleanEnvValue(process.env.PAYU_SALT),
-  payuAmount: cleanEnvValue(process.env.PAYU_AMOUNT) || "499.00",
+  payuAmount: cleanEnvValue(process.env.PAYU_AMOUNT) || "499",
   payuProductInfo:
     cleanEnvValue(process.env.PAYU_PRODUCT_INFO) ||
     "AI Tools Se Website Bana Kar Clients Se Paise Kamao",
